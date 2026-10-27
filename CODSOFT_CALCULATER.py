@@ -35,7 +35,7 @@ def calculator():
     else:
         print("Invalid choice. Please select a valid operation number.")
 
-# Run the calculator
+
 if __name__ == "__main__":
-    calculator()
+    calculater()
     
