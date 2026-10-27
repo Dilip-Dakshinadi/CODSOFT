@@ -1,27 +1,21 @@
-﻿import tkinter as tk
+import tkinter as tk
 from tkinter import messagebox
 import random
 
-# ==============================================================================
-# 🎨 COLOR PALETTE & THEME CONFIGURATION
-# ==============================================================================
-BG_DARK = "#0a0e17"          # Dark futuristic background
-CARD_BG = "#131c2e"          # Elevated panel background
-CARD_BORDER = "#1e293b"      # Card border outline
-TEXT_LIGHT = "#f8fafc"       # Crisp white text
-TEXT_MUTED = "#94a3b8"       # Secondary text color
+BG_DARK = "#0a0e17"
+CARD_BG = "#131c2e"
+CARD_BORDER = "#1e293b"
+TEXT_LIGHT = "#f8fafc"
+TEXT_MUTED = "#94a3b8"
 
-COLOR_ROCK = "#f43f5e"       # Vibrant Neon Rose / Red
-COLOR_PAPER = "#06b6d4"      # Electric Cyan
-COLOR_SCISSORS = "#10b981"   # Emerald Green
-COLOR_EMERALD = "#10b981"    # Emerald Green (Victory)
-COLOR_GOLD = "#f59e0b"       # Trophy Gold
-COLOR_PURPLE = "#a855f7"     # Mystic Purple
-COLOR_BLUE = "#3b82f6"       # Cobalt Blue
+COLOR_ROCK = "#f43f5e"
+COLOR_PAPER = "#06b6d4"
+COLOR_SCISSORS = "#10b981"
+COLOR_EMERALD = "#10b981"
+COLOR_GOLD = "#f59e0b"
+COLOR_PURPLE = "#a855f7"
+COLOR_BLUE = "#3b82f6"
 
-# ==============================================================================
-# 🎮 DATA STRUCTURE & SYMBOLS
-# ==============================================================================
 CHOICE_DATA = {
     "Rock": {
         "symbol": "🪨",
@@ -51,9 +45,6 @@ CHOICE_DATA = {
 
 CHOICES = ["Rock", "Paper", "Scissors"]
 
-# ==============================================================================
-# 📊 GAME STATE VARIABLES
-# ==============================================================================
 user_score = 0
 computer_score = 0
 ties = 0
@@ -63,20 +54,12 @@ total_rounds = 0
 is_animating = False
 history_log = []
 
-# ==============================================================================
-# 🎬 ANIMATION & GAMEPLAY LOGIC
-# ==============================================================================
 def set_buttons_state(state):
-    """Enable or disable choice buttons to prevent input spam during animation."""
     for btn in choice_buttons:
         btn.config(state=state)
     reset_btn.config(state=state)
 
 def animate_duel_step(user_choice, final_computer_choice, step=0):
-    """
-    Simulates a high-energy rolling slot animation before revealing the winner.
-    Cycles through icons and countdown prompts with rapid visual feedback.
-    """
     global is_animating
 
     rolling_symbols = ["✊", "✋", "✌️", "🪨", "📄", "✂️"]
@@ -88,32 +71,25 @@ def animate_duel_step(user_choice, final_computer_choice, step=0):
     ]
 
     if step < 10:
-        # Rapidly shuffle bot symbol to simulate decision thinking
         random_sym = random.choice(rolling_symbols)
         bot_symbol_label.config(text=random_sym, fg=random.choice([COLOR_ROCK, COLOR_PAPER, COLOR_SCISSORS]))
         
-        # User side shakes ready fist
         user_symbol_label.config(text="✊", fg=COLOR_GOLD)
 
-        # Update countdown progress
         countdown_idx = min(step // 3, len(countdown_texts) - 1)
         result_label.config(
             text=f"{countdown_texts[countdown_idx]}  [{step * 10}%]",
             fg=COLOR_PURPLE
         )
 
-        # Pulse duel clash icon
         vs_label.config(text="💥" if step % 2 == 0 else "⚔️")
 
-        # Recursive call with acceleration curve
         delay = 50 + (step * 8)
         root.after(delay, lambda: animate_duel_step(user_choice, final_computer_choice, step + 1))
     else:
-        # Final showdown reveal!
         finish_round(user_choice, final_computer_choice)
 
 def play_game(user_choice):
-    """Triggered when the user picks Rock, Paper, or Scissors."""
     global is_animating
     if is_animating:
         return
@@ -121,18 +97,15 @@ def play_game(user_choice):
     is_animating = True
     set_buttons_state(tk.DISABLED)
 
-    # Lock in user choice visually
     user_data = CHOICE_DATA[user_choice]
     user_name_badge.config(text=f"{user_data['symbol']} {user_data['name']}", fg=user_data['color'])
     bot_name_badge.config(text="🤖 Computing...", fg=TEXT_MUTED)
 
     computer_choice = random.choice(CHOICES)
 
-    # Start the dynamic battle animation
     animate_duel_step(user_choice, computer_choice)
 
 def pulse_winner_animation(widget, primary_color, secondary_color, count=6):
-    """Creates a glowing pulse effect on the result banner."""
     if count > 0:
         next_color = primary_color if count % 2 == 0 else secondary_color
         widget.config(fg=next_color)
@@ -141,20 +114,17 @@ def pulse_winner_animation(widget, primary_color, secondary_color, count=6):
         widget.config(fg=primary_color)
 
 def finish_round(user_choice, computer_choice):
-    """Processes outcome, updates scores, triggers glow animations and logs history."""
     global user_score, computer_score, ties, current_streak, best_streak, total_rounds, is_animating
 
     total_rounds += 1
     user_data = CHOICE_DATA[user_choice]
     bot_data = CHOICE_DATA[computer_choice]
 
-    # Reveal final choices
     user_symbol_label.config(text=user_data["battle_emoji"], fg=user_data["color"])
     bot_symbol_label.config(text=bot_data["battle_emoji"], fg=bot_data["color"])
     bot_name_badge.config(text=f"{bot_data['symbol']} {bot_data['name']}", fg=bot_data["color"])
     vs_label.config(text="⚔️")
 
-    # Evaluate Result
     if user_choice == computer_choice:
         ties += 1
         outcome_symbol = "🤝"
@@ -183,34 +153,28 @@ def finish_round(user_choice, computer_choice):
         pulse_winner_animation(result_label, COLOR_ROCK, "#fca5a5", count=6)
         history_entry = f"R{total_rounds}: {user_data['symbol']} < {bot_data['symbol']} (Loss)"
 
-    # Update Outcome Banner
     result_label.config(
         text=f"{outcome_symbol} {outcome_text}",
         fg=banner_color
     )
 
-    # Update Scoreboard Badges
     score_user_val.config(text=str(user_score))
     score_bot_val.config(text=str(computer_score))
     score_ties_val.config(text=str(ties))
     score_streak_val.config(text=f"{current_streak} (Best: {best_streak})")
 
-    # Calculate Win Rate
     win_rate = (user_score / total_rounds * 100) if total_rounds > 0 else 0
     stats_rate_label.config(text=f"🎯 Win Rate: {win_rate:.1f}%  |  🎮 Total Rounds: {total_rounds}")
 
-    # Update History Ticker
     history_log.insert(0, history_entry)
     if len(history_log) > 4:
         history_log.pop()
     history_ticker.config(text="  •  ".join(history_log))
 
-    # Re-enable inputs
     is_animating = False
     set_buttons_state(tk.NORMAL)
 
 def reset_game():
-    """Resets scores, streaks, and visuals back to clean state."""
     global user_score, computer_score, ties, current_streak, total_rounds, history_log, is_animating
     if is_animating:
         return
@@ -222,14 +186,12 @@ def reset_game():
     total_rounds = 0
     history_log.clear()
 
-    # Reset score display
     score_user_val.config(text="0")
     score_bot_val.config(text="0")
     score_ties_val.config(text="0")
     score_streak_val.config(text="0 (Best: " + str(best_streak) + ")")
     stats_rate_label.config(text="🎯 Win Rate: 0.0%  |  🎮 Total Rounds: 0")
 
-    # Reset arena visuals
     user_symbol_label.config(text="❔", fg=TEXT_MUTED)
     bot_symbol_label.config(text="❔", fg=TEXT_MUTED)
     user_name_badge.config(text="Ready to Play", fg=TEXT_MUTED)
@@ -243,15 +205,10 @@ def reset_game():
     history_ticker.config(text="No recent duels yet")
 
 def exit_game():
-    """Confirms and terminates application safely."""
     if messagebox.askyesno("Exit Battle Arena", "Are you sure you want to quit the duel?"):
         root.destroy()
 
-# ==============================================================================
-# 🎨 HOVER ANIMATION HELPER
-# ==============================================================================
 def attach_hover_effect(widget, default_bg, hover_bg, default_fg, hover_fg):
-    """Binds mouse enter and leave events for smooth interactive micro-interactions."""
     def on_enter(e):
         if str(widget["state"]) != str(tk.DISABLED):
             widget.config(bg=hover_bg, fg=hover_fg, cursor="hand2")
@@ -260,9 +217,6 @@ def attach_hover_effect(widget, default_bg, hover_bg, default_fg, hover_fg):
     widget.bind("<Enter>", on_enter)
     widget.bind("<Leave>", on_leave)
 
-# ==============================================================================
-# 🖥️ GUI SETUP & LAYOUT
-# ==============================================================================
 root = tk.Tk()
 root.title("⚔️ Cyber Duel: Rock • Paper • Scissors ⚔️")
 root.geometry("540x730")
@@ -270,9 +224,6 @@ root.resizable(False, False)
 root.configure(bg=BG_DARK)
 root.protocol("WM_DELETE_WINDOW", exit_game)
 
-# ------------------------------------------------------------------------------
-# 1. HEADER SECTION
-# ------------------------------------------------------------------------------
 header_frame = tk.Frame(root, bg=BG_DARK)
 header_frame.pack(fill="x", pady=(14, 6))
 
@@ -294,9 +245,6 @@ subtitle_label = tk.Label(
 )
 subtitle_label.pack(pady=(2, 0))
 
-# ------------------------------------------------------------------------------
-# 2. STATS & SCOREBOARD DECK
-# ------------------------------------------------------------------------------
 score_card = tk.Frame(root, bg=CARD_BG, highlightbackground=CARD_BORDER, highlightthickness=1)
 score_card.pack(fill="x", padx=18, pady=8)
 
@@ -340,16 +288,12 @@ stats_rate_label = tk.Label(
 )
 stats_rate_label.pack(pady=(0, 6))
 
-# ------------------------------------------------------------------------------
-# 3. INTERACTIVE BATTLE STAGE (FIGHTER CARDS)
-# ------------------------------------------------------------------------------
 arena_frame = tk.Frame(root, bg=BG_DARK)
 arena_frame.pack(fill="x", padx=18, pady=6)
 arena_frame.columnconfigure(0, weight=4)
 arena_frame.columnconfigure(1, weight=1)
 arena_frame.columnconfigure(2, weight=4)
 
-# --- Fighter Card: Player ---
 user_card = tk.Frame(arena_frame, bg=CARD_BG, highlightbackground=CARD_BORDER, highlightthickness=1)
 user_card.grid(row=0, column=0, sticky="nsew", padx=(0, 4), pady=4)
 
@@ -379,7 +323,6 @@ user_name_badge = tk.Label(
 )
 user_name_badge.pack(pady=(0, 10))
 
-# --- Versus Separator ---
 vs_box = tk.Frame(arena_frame, bg=BG_DARK)
 vs_box.grid(row=0, column=1, sticky="nsew")
 
@@ -392,7 +335,6 @@ vs_label = tk.Label(
 )
 vs_label.pack(expand=True)
 
-# --- Fighter Card: CyberBot ---
 bot_card = tk.Frame(arena_frame, bg=CARD_BG, highlightbackground=CARD_BORDER, highlightthickness=1)
 bot_card.grid(row=0, column=2, sticky="nsew", padx=(4, 0), pady=4)
 
@@ -422,9 +364,6 @@ bot_name_badge = tk.Label(
 )
 bot_name_badge.pack(pady=(0, 10))
 
-# ------------------------------------------------------------------------------
-# 4. OUTCOME & ANNOUNCEMENT BANNER
-# ------------------------------------------------------------------------------
 result_banner_frame = tk.Frame(root, bg=CARD_BG, highlightbackground=CARD_BORDER, highlightthickness=1)
 result_banner_frame.pack(fill="x", padx=18, pady=8)
 
@@ -439,9 +378,6 @@ result_label = tk.Label(
 )
 result_label.pack(pady=12, padx=10)
 
-# ------------------------------------------------------------------------------
-# 5. CHOICE ACTION BUTTONS (HIGH-OCTANE ACTION DECK)
-# ------------------------------------------------------------------------------
 controls_frame = tk.Frame(root, bg=BG_DARK)
 controls_frame.pack(fill="x", padx=18, pady=8)
 controls_frame.columnconfigure((0, 1, 2), weight=1)
@@ -478,7 +414,6 @@ btn_rock = create_action_button(controls_frame, 0, "Rock", "R")
 btn_paper = create_action_button(controls_frame, 1, "Paper", "P")
 btn_scissors = create_action_button(controls_frame, 2, "Scissors", "S")
 
-# Keyboard shortcut bindings
 root.bind("<r>", lambda e: play_game("Rock"))
 root.bind("<R>", lambda e: play_game("Rock"))
 root.bind("<p>", lambda e: play_game("Paper"))
@@ -487,9 +422,6 @@ root.bind("<s>", lambda e: play_game("Scissors"))
 root.bind("<S>", lambda e: play_game("Scissors"))
 root.bind("<space>", lambda e: reset_game())
 
-# ------------------------------------------------------------------------------
-# 6. RECENT MATCH HISTORY TICKER
-# ------------------------------------------------------------------------------
 history_frame = tk.Frame(root, bg=BG_DARK)
 history_frame.pack(fill="x", padx=18, pady=4)
 
@@ -510,9 +442,6 @@ history_ticker = tk.Label(
 )
 history_ticker.pack(anchor="w", pady=(1, 4))
 
-# ------------------------------------------------------------------------------
-# 7. FOOTER CONTROL BUTTONS
-# ------------------------------------------------------------------------------
 footer_frame = tk.Frame(root, bg=BG_DARK)
 footer_frame.pack(fill="x", padx=18, pady=(8, 14))
 footer_frame.columnconfigure((0, 1), weight=1)
@@ -555,8 +484,5 @@ exit_btn = tk.Button(
 exit_btn.grid(row=0, column=1, padx=6, sticky="nsew")
 attach_hover_effect(exit_btn, CARD_BG, COLOR_ROCK, COLOR_ROCK, "#ffffff")
 
-# ------------------------------------------------------------------------------
-# START EVENT LOOP
-# ------------------------------------------------------------------------------
 if __name__ == "__main__":
     root.mainloop()
